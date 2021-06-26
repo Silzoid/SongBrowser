@@ -31,7 +31,7 @@ namespace AudicaModding
                 backButtonLabel.alpha = .25f;
             }
             if (showPopup) PlaylistUtil.Popup("Downloading..");
-            MelonCoroutines.Start(SongDownloader.DoSongWebSearch(filename, OnWebSearchDone, DifficultyFilter.All, false, false, 1, false, true));
+            MelonCoroutines.Start(SongDownloader.DoSongWebSearch(filename, OnWebSearchDone, DifficultyFilter.All, false, 1, false, true));
         }
 
         public void DownloadSongs(List<string> filenames, bool showPopup, GunButton button, TextMeshPro label)
@@ -47,7 +47,7 @@ namespace AudicaModding
             if (showPopup) PlaylistUtil.Popup("Downloading..");
             foreach (string filename in filenames)
             {
-                MelonCoroutines.Start(SongDownloader.DoSongWebSearch(filename, OnWebSearchDone, DifficultyFilter.All, false, false, 1, false, true));
+                MelonCoroutines.Start(SongDownloader.DoSongWebSearch(filename, OnWebSearchDone, DifficultyFilter.All, false, 1, false, true));
             }
         }
 
