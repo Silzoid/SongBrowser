@@ -501,6 +501,7 @@ namespace AudicaModding
             {
                 if (state == StartupLogo.State.Done)
                 {
+                    SongBrowser.isInitialized = true;
                     SongDownloader.StartNewSongSearch();
                     PlaylistManager.OnApplicationStart();
                     FilterPanel.OnApplicationStart();
