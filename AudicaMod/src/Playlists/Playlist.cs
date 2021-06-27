@@ -18,7 +18,8 @@ namespace AudicaModding
         public Dictionary<string, string> songNames { get; set; }
         [JsonIgnore]
         public Dictionary<string, bool> downloadedDict { get; set; }
-
+        [JsonIgnore]
+        public string filename { get; set; }
         public Playlist(string name, List<string> songs)
         {
             this.name = name;

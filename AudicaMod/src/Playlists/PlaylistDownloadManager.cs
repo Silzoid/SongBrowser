@@ -110,6 +110,11 @@ namespace AudicaModding
 
         private void OnDownloadComplete(string search, bool success)
         {
+            if(!IsDownloadingMissing && prepareDownloadMissing)
+            {
+                IsDownloadingMissing = true;
+                prepareDownloadMissing = false;
+            }
             ActiveDownloads -= 1;
             if (!success) MelonLogger.Warning("Download of " + search + " failed");
             if (ActiveDownloads > 0) return;

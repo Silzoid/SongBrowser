@@ -47,6 +47,7 @@ namespace AudicaModding
 				if (newName.Length == 0) return;
 
 				Playlist playlist = new Playlist(newName, new List<string>());
+				playlist.filename = newName + ".playlist";
 				PlaylistManager.AddNewPlaylist(playlist, true);
 				//PlaylistManager.SelectPlaylist(playlist.name);
 				PlaylistManager.SavePlaylist(playlist.name, false);

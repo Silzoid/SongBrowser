@@ -141,6 +141,7 @@ namespace AudicaModding
                 {
                     string json = reader.ReadToEnd();
                     Playlist playlist = JsonConvert.DeserializeObject<Playlist>(json);
+                    playlist.filename = Path.GetFileName(playlistJson);
                     return new KeyValuePair<string, Playlist>(playlist.name, playlist);
                 }
             }
@@ -200,12 +201,12 @@ namespace AudicaModding
 
         private string GetPlaylistPath(Playlist playlist)
         {
-            return GetPlaylistPath(playlist.name);
+            return GetPlaylistPath(playlist.filename);
         }
 
         private string GetPlaylistPath(string name)
         {
-            return Path.Combine(playlistDirectory, name + ".playlist");
+            return Path.Combine(playlistDirectory, name);
         }
 
         [Serializable]
