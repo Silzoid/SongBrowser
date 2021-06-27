@@ -98,13 +98,14 @@ namespace AudicaModding
                     IsDownloadingMissing = false;
                     prepareDownloadMissing = false;
                 }*/
-                if (IsDownloadingMissing) IsDownloadingMissing = false;
+                MelonLogger.Msg("search returned no matches.");
                 return;
             }
             if(result.song_count == 1)
             {
                 Song song = result.songs[0];
                 ActiveDownloads++;
+                MelonLogger.Msg("Downloading " + song.song_id);
                 MelonCoroutines.Start(SongDownloader.DownloadSong(song.song_id, song.download_url, OnDownloadComplete));
             }
         }
@@ -116,8 +117,21 @@ namespace AudicaModding
                 IsDownloadingMissing = true;
                 prepareDownloadMissing = false;
             }*/
+            
             ActiveDownloads -= 1;
-            if (!success) MelonLogger.Warning("Download of " + search + " failed");
+            if (!success)
+            {
+                MelonLogger.Warning("Download of " + search + " failed");
+                if (ActiveDownloads > 0) return;
+                if (IsDownloadingMissing)
+                {
+                    IsDownloadingMissing = false;
+                    SongLoadingManager.EnableButtons();
+                    PlaylistUtil.Popup("Missing playlist songs downloaded.");
+                    PopulatePlaylists();
+                    SongBrowser.ReloadSongList();
+                }
+            }
             if (ActiveDownloads > 0) return;
             if (!IsDownloadingMissing)
             {
