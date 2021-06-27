@@ -325,6 +325,7 @@ namespace AudicaModding
                         __result.Remove(deletedSong);
                     }
                 }
+                RandomSong.UpdateAvailableSongs(__result);
             }
         }
 

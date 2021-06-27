@@ -5,7 +5,7 @@ using MelonLoader;
 using UnityEngine;
 using MelonLoader.TinyJSON;
 using System.IO;
-using Harmony;
+using HarmonyLib;
 using System.Linq;
 [assembly: MelonOptionalDependencies("SongDataLoader", "ModSettings", "AuthorableModifiers")]
 
@@ -16,7 +16,7 @@ namespace AudicaModding
         public static class BuildInfo
         {
             public const string Name = "SongBrowser";  // Name of the Mod.  (MUST BE SET)
-            public const string Author = "octo"; // Author of the Mod.  (Set as null if none)
+            public const string Author = "octo and AUDICA modding group"; // Author of the Mod.  (Set as null if none)
             public const string Company = null; // Company that made the Mod.  (Set as null if none)
             public const string Version = "3.0.1"; // Version of the Mod.  (MUST BE SET)
             public const string DownloadLink = null; // Download Link for the Mod.  (Set as null if none)

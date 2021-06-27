@@ -13,10 +13,7 @@ namespace AudicaModding
 {
     public static class SongDownloader
     {
-        internal static bool UseNewAPI = true;
-
-        internal static string          apiURL              = "http://www.audica.wiki:5000/api/customsongs?pagesize=14";
-        internal static string          newApiUrl           = "https://maudica.com/api/maps?per_page=14";
+        internal static string          apiUrl              = "https://maudica.com/api/maps?per_page=14";
         internal static string          downloadUrlFormat   = "https://maudica.com/maps/{0}/download";
         internal static string          previewUrlFormat    = "https://maudica.com/maps/{0}/preview";
         internal static APISongList     songlist;           
@@ -35,88 +32,71 @@ namespace AudicaModding
         /// <param name="search">Query text, e.g. song name, artist or mapper (partial matches possible)</param>
         /// <param name="onSearchComplete">Called with search result once search is completed, use to process search result</param>
         /// <param name="difficulty">Only find songs with given difficulty</param>
-        /// <param name="curated">Only find songs that are curated</param>
-        /// <param name="sortByPlayCount">Sort result by play count</param>
+        /// <param name="sortByDownloads">Sort result by downloads</param>
         /// <param name="page">Page to return (see APISongList.total_pages after initial search (page = 1) to check if multiple pages exist)</param>
-        /// <param name="total">Bypasses all query and filter limitations and just returns entire song list (or max page size)</param>
-        public static IEnumerator DoSongWebSearch(string search, Action<string, APISongList> onSearchComplete, DifficultyFilter difficulty, bool curated = false, 
-                                                  bool sortByPlayCount = false, int page = 1, bool total = false, bool searchIsFilename = false)
+        /// <param name="total">Bypasses all query and filter limitations and just returns entire song list (slow!)</param>
+        public static IEnumerator DoSongWebSearch(string search, Action<string, APISongList> onSearchComplete, DifficultyFilter difficulty,
+                                                  bool sortByDownloads = false, int page = 1, bool total = false, bool searchIsFilename = false)
         {
-            if (UseNewAPI)
+            if (total)
             {
-                if (total)
+                string webSearch = "https://maudica.com/api/maps?per_page=100&page={0}";
+
+                // initial search to initialize result list
+                WWW www = new WWW(string.Format(webSearch, 1));
+                yield return www;
+                NewAPISongList list = JSON.Load(www.text).Make<NewAPISongList>();
+
+                APISongList result = new APISongList();
+                result.song_count  = list.count;
+                result.page        = 1;
+                result.pagesize    = list.count;
+                result.total_pages = 1;
+                result.songs       = new Song[list.count];
+
+                int numPages = (int)Math.Ceiling((double)list.count / 100);
+                int currPage = 1;
+                ConvertAPIList(list, result, 0);
+                while (currPage <= numPages)
                 {
-                    string webSearch = "https://beta.maudica.com/api/maps?per_page=100&page={0}";
-
-                    // initial search to initialize result list
-                    WWW www = new WWW(string.Format(webSearch, 1));
+                    currPage++;
+                    www = new WWW(string.Format(webSearch, currPage));
                     yield return www;
-                    NewAPISongList list = JSON.Load(www.text).Make<NewAPISongList>();
-
-                    APISongList result = new APISongList();
-                    result.song_count  = list.count;
-                    result.page        = 1;
-                    result.pagesize    = list.count;
-                    result.total_pages = 1;
-                    result.songs       = new Song[list.count];
-
-                    int numPages = (int)Math.Ceiling((double)list.count / 100);
-                    int currPage = 1;
-                    ConvertAPIList(list, result, 0);
-                    while (currPage <= numPages)
-                    {
-                        currPage++;
-                        www = new WWW(string.Format(webSearch, currPage));
-                        yield return www;
-                        list = JSON.Load(www.text).Make<NewAPISongList>();
-                        ConvertAPIList(list, result, 100 * (currPage - 1));
-                    }
-                    onSearchComplete(search, result);
+                    list = JSON.Load(www.text).Make<NewAPISongList>();
+                    ConvertAPIList(list, result, 100 * (currPage - 1));
                 }
-                else
-                {
-                    string webSearch;
-                    string concatURL;
-                    if (searchIsFilename)
-                    {
-                        webSearch = search == null || search == "" ? "" : "&filename=" + WebUtility.UrlEncode(search);
-                        concatURL = newApiUrl + webSearch;
-                    }
-                    else
-                    {
-                        webSearch     = search == null || search == "" ? "" : "&search=" + WebUtility.UrlEncode(search);
-                        string webPage       = page == 1 ? "" : "&page=" + page.ToString();
-                        string webDifficulty = difficulty == DifficultyFilter.All ? "" : "&difficulties%5B%5D=" + DifficultyToNewAPIValue(difficulty);
-                        string webDownloads  = sortByPlayCount ? "&sort=downloads" : "";
-                        concatURL = newApiUrl + webSearch + webDifficulty + webPage + webDownloads;
-                    }
-                    WWW www = new WWW(concatURL);
-                    yield return www;
-                    NewAPISongList list = JSON.Load(www.text).Make<NewAPISongList>();
-
-                    // convert to existing SongList format, then return
-                    APISongList result = new APISongList();
-                    result.song_count = list.count;
-                    result.page = page;
-                    result.pagesize = 14;
-                    result.total_pages = (int)Math.Ceiling(result.song_count / (double)result.pagesize);
-                    result.songs = new Song[list.maps.Length];
-                    ConvertAPIList(list, result, 0);
-                    onSearchComplete(search, result);
-                }
+                onSearchComplete(search, result);
             }
             else
             {
-                string webSearch = search == null || search == "" ? "" : "&search=" + WebUtility.UrlEncode(search);
-                string webPage = page == 1 ? "" : "&page=" + page.ToString();
-                string diff = difficulty.ToString();
-                string webDifficulty = diff == "All" ? "" : "&" + diff.ToLower() + "=true";
-                string webCurated = curated ? "&curated=true" : "";
-                string webPlaycount = sortByPlayCount ? "&sort=leaderboards" : "";
-                string concatURL = !total ? apiURL + webSearch + webDifficulty + webPage + webCurated + webPlaycount : "http://www.audica.wiki:5000/api/customsongs?pagesize=all";
+                string webSearch;
+                string concatURL;
+                if (searchIsFilename)
+                {
+                    webSearch = search == null || search == "" ? "" : "&filename=" + WebUtility.UrlEncode(search);
+                    concatURL = apiUrl + webSearch;
+                }
+                else
+                {
+                    webSearch     = search == null || search == "" ? "" : "&search=" + WebUtility.UrlEncode(search);
+                    string webPage       = page == 1 ? "" : "&page=" + page.ToString();
+                    string webDifficulty = difficulty == DifficultyFilter.All ? "" : "&difficulties%5B%5D=" + DifficultyToNewAPIValue(difficulty);
+                    string webDownloads  = sortByDownloads ? "&sort=downloads" : "";
+                    concatURL = apiUrl + webSearch + webDifficulty + webPage + webDownloads;
+                }
                 WWW www = new WWW(concatURL);
                 yield return www;
-                onSearchComplete(search, JSON.Load(www.text).Make<APISongList>());
+                NewAPISongList list = JSON.Load(www.text).Make<NewAPISongList>();
+
+                // convert to existing SongList format, then return
+                APISongList result = new APISongList();
+                result.song_count = list.count;
+                result.page = page;
+                result.pagesize = 14;
+                result.total_pages = (int)Math.Ceiling(result.song_count / (double)result.pagesize);
+                result.songs = new Song[list.maps.Length];
+                ConvertAPIList(list, result, 0);
+                onSearchComplete(search, result);
             }
         }
 
@@ -208,8 +188,7 @@ namespace AudicaModding
                 {
                     SongDownloaderUI.AddSongItems(SongDownloaderUI.songItemMenu, songlist);
                 }
-            }, SongDownloaderUI.difficultyFilter, 
-               SongDownloaderUI.curated, SongDownloaderUI.popularity, page, false));
+            }, SongDownloaderUI.difficultyFilter, SongDownloaderUI.popularity, page, false));
         }
 
         internal static void NextPage()
