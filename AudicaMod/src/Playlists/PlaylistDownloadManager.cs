@@ -59,8 +59,8 @@ namespace AudicaModding
             {
                 return;
             }
-            //IsDownloadingMissing = true;
-            prepareDownloadMissing = true;
+            IsDownloadingMissing = true;
+            //prepareDownloadMissing = true;
             List<string> songs = new List<string>();
             foreach (Playlist playlist in PlaylistManager.playlists.Values)
             {
@@ -93,11 +93,12 @@ namespace AudicaModding
         {
             if (result is null)
             {
-                if (IsDownloadingMissing && prepareDownloadMissing)
+                /*if (IsDownloadingMissing && prepareDownloadMissing)
                 {
                     IsDownloadingMissing = false;
                     prepareDownloadMissing = false;
-                }
+                }*/
+                if (IsDownloadingMissing) IsDownloadingMissing = false;
                 return;
             }
             if(result.song_count == 1)
@@ -110,11 +111,11 @@ namespace AudicaModding
 
         private void OnDownloadComplete(string search, bool success)
         {
-            if(!IsDownloadingMissing && prepareDownloadMissing)
+            /*if(!IsDownloadingMissing && prepareDownloadMissing)
             {
                 IsDownloadingMissing = true;
                 prepareDownloadMissing = false;
-            }
+            }*/
             ActiveDownloads -= 1;
             if (!success) MelonLogger.Warning("Download of " + search + " failed");
             if (ActiveDownloads > 0) return;
