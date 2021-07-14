@@ -53,7 +53,10 @@ internal static class ScoreDisplayList
 
     public static void UpdateTextFromList()
     {
-        scoreListText.text = CreateDisplayString(ScoreHistory.calculatedScores);
+        if (scoreListText != null && scoreListText.text != null && ScoreHistory.calculatedScores != null)
+        {
+            scoreListText.text = CreateDisplayString(ScoreHistory.calculatedScores);
+        }
     }
 
     public static string CreateDisplayString(List<CalculatedScoreEntry> scores)
