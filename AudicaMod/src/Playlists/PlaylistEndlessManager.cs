@@ -18,7 +18,7 @@ namespace AudicaModding
         private static bool fadeInProgress = false;
         private static bool previousNoFail = false;
         private static bool pendingReset = false;
-        private static bool EndlessActive => PlaylistManager.state == PlaylistManager.PlaylistState.Endless;
+        public static bool EndlessActive => PlaylistManager.state == PlaylistManager.PlaylistState.Endless;
 
         public static void StartEndlessSession()
         {
