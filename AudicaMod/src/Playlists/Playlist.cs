@@ -37,8 +37,23 @@ namespace AudicaModding
                 return;
             }
             songs.Add(song);
-            songNames.Add(song, GetSongName(song));
-            downloadedDict.Add(song, true);
+            if (songNames.ContainsKey(song))
+            {
+                MelonLogger.Msg("Songname already exists. Updating value.");
+                songNames[song] = GetSongName(song);
+            }
+            else
+            {
+                songNames.Add(song, GetSongName(song));
+            }
+            if (downloadedDict.ContainsKey(song))
+            {
+                downloadedDict[song] = true;
+            }
+            else
+            {
+                downloadedDict.Add(song, true);
+            }
         }
 
         public void RemoveSong(string song)

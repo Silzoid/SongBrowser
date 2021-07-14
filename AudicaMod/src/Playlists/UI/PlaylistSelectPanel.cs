@@ -25,8 +25,10 @@ namespace AudicaModding
 
 		public static void CancelSelect()
 		{
+			bool wasAdding = PlaylistManager.state == PlaylistManager.PlaylistState.Adding;
 			PlaylistManager.state = PlaylistManager.PlaylistState.None;
-			MenuState.I.GoToSongPage();
+			if (wasAdding) MenuState.I.GoToLaunchPage();
+			else MenuState.I.GoToSongPage();
 			SelectPlaylistButton.UpdatePlaylistButton();
 		}
 

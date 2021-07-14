@@ -148,6 +148,7 @@ namespace AudicaModding
                 MelonLogger.Msg("Playlist " + playlistName + " couldn't be found.");
                 return;
             }
+            PlaylistUtil.Popup(songName + " added to " + playlistName);
             playlists[playlistName].AddSong(songName);
             SavePlaylist(playlistName, false);
             AddPlaylistButton.songToAdd = "";

@@ -13,7 +13,7 @@ namespace AudicaModding
     internal class PlaylistDownloadManager
     {
         public Song[] songList { get; private set; }
-        public static bool IsDownloadingMissing = false;
+        public static bool IsDownloadingMissing { get; set; } = false;
         public static int ActiveDownloads = 0;
         private bool missingSongsFound = false;
         private GunButton backButton = null;
@@ -31,6 +31,7 @@ namespace AudicaModding
                 backButtonLabel.alpha = .25f;
             }
             if (showPopup) PlaylistUtil.Popup("Downloading..");
+            MelonLogger.Msg("Downloading " + filename);
             MelonCoroutines.Start(SongDownloader.DoSongWebSearch(filename, OnWebSearchDone, DifficultyFilter.All, false, 1, false, true));
         }
 
@@ -86,6 +87,7 @@ namespace AudicaModding
                 prepareDownloadMissing = false;
                 IsDownloadingMissing = false;
                 PopulatePlaylists();
+                SongLoadingManager.UpdateUI();
             }
         }
 
@@ -105,8 +107,12 @@ namespace AudicaModding
             {
                 Song song = result.songs[0];
                 ActiveDownloads++;
-                MelonLogger.Msg("Downloading " + song.song_id);
                 MelonCoroutines.Start(SongDownloader.DownloadSong(song.song_id, song.download_url, OnDownloadComplete));
+            }
+            else
+            {
+                MelonLogger.Msg("Multiple or no results found.");
+                if(ActiveDownloads == 0) EnableBackButton();
             }
         }
 
